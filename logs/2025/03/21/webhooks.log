@@ -1,0 +1,48 @@
+[2025-03-21 14:10:11] Type: bayut-whatsapp, Data: {
+    "date_time": "2025-03-20 18:34:31",
+    "source": "bayut",
+    "listing_id": 11064388,
+    "lead_id": "whatsapp|a6dc2c94-f6cf-4300-98a6-575b65ccebcc",
+    "listing_reference": "Giproperties-12126108",
+    "detail": {
+        "actor_name": "Vineet Chawla",
+        "cell": "+97433159780",
+        "message": "Hi, I am interested in your property on Bayut. Link: https:\/\/www.bayut.com\/pm\/11064388\/e3e2905e-ab84-4fee-98c7-4de9e06b3c6f\nReference no.: Giproperties-12126108"
+    },
+    "delivery_notifications": [
+        {
+            "status": "sent",
+            "created_at": "2025-03-20 18:34:35"
+        },
+        {
+            "status": "delivered",
+            "created_at": "2025-03-20 18:34:36"
+        },
+        {
+            "status": "read",
+            "created_at": "2025-03-20 18:35:02"
+        }
+    ]
+}
+[2025-03-21 14:11:06] Type: dubizzle-whatsapp, Data: {
+    "date_time": "2025-03-21 00:17:57",
+    "source": "dubizzle",
+    "listing_id": 25852974,
+    "lead_id": "whatsapp|olx|mea|ae|whatsapp|f0cffb0e6b03441cb3875ec91c9d1b50",
+    "listing_reference": "giproperties-17399364",
+    "detail": {
+        "actor_name": "Max",
+        "cell": "+971524238899",
+        "message": "Hello! I'm interested in this property advertised on dubizzle.  Link: https:\/\/dubizzle.com\/s\/DfBk372 Reference number: 24\/25852974  *Kindly do not edit this message to ensure your inquiry is sent to the agent."
+    },
+    "delivery_notifications": [
+        {
+            "status": "sent",
+            "created_at": "2025-03-21 00:18:00"
+        },
+        {
+            "status": "delivered",
+            "created_at": "2025-03-21 00:18:01"
+        }
+    ]
+}

@@ -22,34 +22,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     ]);
 }
 
-$parts = explode("/", $_SERVER['REQUEST_URI']);
-$parts = array_filter($parts);
-$parts = array_values($parts);
+$leadType = $_GET['lead_type'] ?? null;
 
 $validRoutes = [
     'bayut-whatsapp',
     'dubizzle-whatsapp',
 ];
 
-$route = null;
-foreach ($validRoutes as $validRoute) {
-    $index = array_search($validRoute, $parts);
-    if ($index !== false) {
-        $route = $validRoute;
-        break;
-    }
-}
-
-if ($route === null) {
+if (!in_array($leadType, $validRoutes, true)) {
     sendJsonResponse(404, [
         'error' => 'Not Found',
-        'message' => 'The requested endpoint does not exist'
+        'message' => 'Invalid lead_type provided'
     ]);
 }
 
 try {
     $controller = new WebhookController();
-    $controller->handleRequest($route);
+    $controller->handleRequest($leadType);
 } catch (Throwable $e) {
     error_log("Error processing request: " . $e->getMessage());
     sendJsonResponse(500, [
