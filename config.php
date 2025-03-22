@@ -1,5 +1,9 @@
 <?php
 
 return [
-    'DEFAULT_RESPONSIBLE_PERSON_ID' => 53, // Masroor Khan
+    'DUBIZZLE_WHATSAPP' => 'UC_NUP3WI',
+    'BAYUT_WHATSAPP' => 'UC_DPPLAR',
+    'SECONDARY_PIPELINE_ID' => 24,
+    'LISTINGS_ENTITY_TYPE_ID' => 1084,
+    'DEFAULT_RESPONSIBLE_PERSON_ID' => 1593, // Alyssa Ashley Erise
 ];

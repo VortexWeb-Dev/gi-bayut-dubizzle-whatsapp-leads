@@ -2,6 +2,8 @@
 
 require_once __DIR__ . "/crest/crest.php";
 
+define('CONFIG', require_once __DIR__ . '/config.php');
+
 // Formats the comments for the call
 function formatComments(array $data): string
 {
@@ -148,4 +150,113 @@ function timeToSec($time)
 {
     $time = explode(':', $time);
     return $time[0] * 3600 + $time[1] * 60 + $time[2];
+}
+
+// Gets the user ID
+function getUserId(array $filter): ?int
+{
+    $response = CRest::call('user.get', [
+        'filter' => array_merge($filter, ['ACTIVE' => 'Y']),
+    ]);
+
+    if (!empty($response['error'])) {
+        error_log('Error getting user: ' . $response['error_description']);
+        return null;
+    }
+
+    if (empty($response['result'])) {
+        return null;
+    }
+
+    if (empty($response['result'][0]['ID'])) {
+        return null;
+    }
+
+    return (int)$response['result'][0]['ID'];
+}
+
+// Gets the responsible person ID
+function getResponsiblePerson(string $searchValue, string $searchType): ?int
+{
+    if ($searchType === 'reference') {
+        $response = CRest::call('crm.item.list', [
+            'entityTypeId' => CONFIG['LISTINGS_ENTITY_TYPE_ID'],
+            'filter' => ['ufCrm37ReferenceNumber' => $searchValue],
+            'select' => ['ufCrm37ReferenceNumber', 'ufCrm37AgentEmail', 'ufCrm37ListingOwner', 'ufCrm37OwnerId'],
+        ]);
+
+        if (!empty($response['error'])) {
+            error_log(
+                'Error getting CRM item: ' . $response['error_description']
+            );
+            return CONFIG['DEFAULT_RESPONSIBLE_PERSON_ID'];
+        }
+
+        if (
+            empty($response['result']['items']) ||
+            !is_array($response['result']['items'])
+        ) {
+            error_log(
+                'No listing found with reference number: ' . $searchValue
+            );
+            return CONFIG['DEFAULT_RESPONSIBLE_PERSON_ID'];
+        }
+
+        $listing = $response['result']['items'][0];
+
+        $ownerId = $listing['ufCrm37OwnerId'] ?? null;
+        if ($ownerId && is_numeric($ownerId)) {
+            return (int)$ownerId;
+        }
+
+        $ownerName = $listing['ufCrm37ListingOwner'] ?? null;
+
+        if ($ownerName) {
+            $nameParts = explode(' ', trim($ownerName), 2);
+
+            $firstName = $nameParts[0] ?? null;
+            $lastName = $nameParts[1] ?? null;
+
+            return getUserId([
+                '%NAME' => $firstName,
+                '%LAST_NAME' => $lastName,
+                '!ID' => [3, 268]
+            ]);
+        }
+
+
+        $agentEmail = $listing['ufCrm37AgentEmail'] ?? null;
+        if ($agentEmail) {
+            return getUserId([
+                'EMAIL' => $agentEmail,
+                '!ID' => 3,
+                '!ID' => 268
+            ]);
+        } else {
+            error_log(
+                'No agent email found for reference number: ' . $searchValue
+            );
+            return CONFIG['DEFAULT_RESPONSIBLE_PERSON_ID'];
+        }
+    } else if ($searchType === 'phone') {
+        return getUserId([
+            '%PERSONAL_MOBILE' => $searchValue,
+            '!ID' => 3,
+            '!ID' => 268
+        ]);
+    }
+
+    return CONFIG['DEFAULT_RESPONSIBLE_PERSON_ID'];
+}
+
+// Gets the property price
+function getPropertyPrice($propertyReference)
+{
+    $response = CRest::call('crm.item.list', [
+        'entityTypeId' => CONFIG['LISTINGS_ENTITY_TYPE_ID'],
+        'filter' => ['ufCrm37ReferenceNumber' => $propertyReference],
+        'select' => ['ufCrm37Price'],
+    ]);
+
+    return $response['result']['items'][0]['ufCrm37Price'] ?? null;
 }

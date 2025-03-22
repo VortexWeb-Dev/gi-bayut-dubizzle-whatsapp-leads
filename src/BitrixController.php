@@ -13,8 +13,23 @@ class BitrixController
             exit;
         }
 
-        $result = CRest::call('crm.lead.add', [
+        $result = CRest::call('crm.deal.add', [
             'fields' => $leadData,
+            'params' => ["REGISTER_SONET_EVENT" => "Y"]
+        ]);
+
+        if (isset($result['result'])) {
+            return $result['result'];
+        } else {
+            return null;
+        }
+        exit;
+    }
+
+    public function createContact(array $contactData): ?int
+    {
+        $result = CRest::call('crm.contact.add', [
+            'fields' => $contactData,
             'params' => ["REGISTER_SONET_EVENT" => "Y"]
         ]);
 
