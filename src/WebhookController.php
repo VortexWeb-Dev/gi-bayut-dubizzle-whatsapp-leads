@@ -77,9 +77,41 @@ class WebhookController
     public function handleBayutWhatsapp(array $data): void
     {
         $this->logger->logWebhook('bayut-whatsapp', $data);
-        // Process lead data
+
+        $assignedById = !empty($data['listing']['reference']) ? getResponsiblePerson($data['listing']['reference'], 'reference') : CONFIG['DEFAULT_RESPONSIBLE_PERSON_ID'];
+        $title = "Bayut - WhatsApp - " . ($data['listing']['reference'] !== "" ? $data['listing']['reference'] : 'No reference');
+
+        $contactId = $this->bitrix->createContact([
+            'NAME' => $data['enquirer']['name'] ?? $title,
+            'PHONE' => [
+                [
+                    'VALUE' => $data['enquirer']['phone_number'],
+                    'VALUE_TYPE' => 'WORK',
+                ]
+            ],
+            'SOURCE_ID' => CONFIG['BAYUT_WHATSAPP'],
+            'ASSIGNED_BY_ID' => $assignedById
+        ]);
+
+        $fields = [
+            'TITLE' => $title,
+            'CATEGORY_ID' => CONFIG['SECONDARY_PIPELINE_ID'],
+            'ASSIGNED_BY_ID' => $assignedById,
+            'SOURCE_ID' => CONFIG['BAYUT_WHATSAPP'],
+            'UF_CRM_1721198189214' => $data['enquirer']['name'] ?? 'Unknown',
+            'UF_CRM_1736406984' => $data['enquirer']['phone_number'],
+            'UF_CRM_1739873044322' => $data['enquirer']['contact_link'],
+            'UF_CRM_1739890146108' => $data['listing']['reference'],
+            'UF_CRM_1739945676' => $data['listing']['url'],
+            'OPPORTUNITY' => getPropertyPrice($data['listing']['reference']) ?? '',
+            'COMMENTS' => $data['message'],
+            'CONTACT_ID' => $contactId,
+        ];
+
+        $leadId = $this->bitrix->addLead($fields);
+
         $this->sendResponse(200, [
-            'message' => 'Lead data processed successfully',
+            'message' => 'Lead data processed successfully and lead created with ID: ' . $leadId,
         ]);
     }
 
