@@ -212,15 +212,24 @@ function getResponsiblePerson(string $searchValue, string $searchType): ?int
         $ownerName = $listing['ufCrm37ListingOwner'] ?? null;
 
         if ($ownerName) {
-            $nameParts = explode(' ', trim($ownerName), 2);
+            $nameParts = explode(' ', trim($ownerName));
+            $combinations = [];
 
-            $firstName = $nameParts[0] ?? null;
-            $lastName = $nameParts[1] ?? null;
+            for ($i = 1; $i < count($nameParts); $i++) {
+                $first = implode(' ', array_slice($nameParts, 0, $i));
+                $last = implode(' ', array_slice($nameParts, $i));
+                $combinations[] = ['%NAME' => $first, '%LAST_NAME' => $last];
+            }
+
+            foreach ($combinations as $filter) {
+                $filter['!ID'] = [3, 268, 1945];
+                $user = getUserId($filter);
+                if ($user) return $user;
+            }
 
             return getUserId([
-                '%NAME' => $firstName,
-                '%LAST_NAME' => $lastName,
-                '!ID' => [3, 268]
+                '%FIND' => $ownerName,
+                '!ID' => [3, 268, 1945]
             ]);
         }
 
@@ -229,8 +238,7 @@ function getResponsiblePerson(string $searchValue, string $searchType): ?int
         if ($agentEmail) {
             return getUserId([
                 'EMAIL' => $agentEmail,
-                '!ID' => 3,
-                '!ID' => 268
+                '!ID' => [3, 268, 1945]
             ]);
         } else {
             error_log(
@@ -241,8 +249,7 @@ function getResponsiblePerson(string $searchValue, string $searchType): ?int
     } else if ($searchType === 'phone') {
         return getUserId([
             '%PERSONAL_MOBILE' => $searchValue,
-            '!ID' => 3,
-            '!ID' => 268
+            '!ID' => [3, 268, 1945]
         ]);
     }
 
